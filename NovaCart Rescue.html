@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NovaCart Rescue</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef4f2;--card:#fff;--ink:#14213d;--mut:#5b6b7a;--mint:#13a58a;--org:#ff7a1a;--line:#d5e0dc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1626;--card:#17233b;--ink:#eaf1f5;--mut:#9db0c0;--mint:#2ed3b3;--line:#27375a}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.45 "Bricolage Grotesque",system-ui,sans-serif;padding-bottom:72px}
+main{max-width:520px;margin:0 auto;padding:14px}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em}
+h1{font-size:26px}h2{font-size:20px;margin:6px 0 10px}h3{font-size:16px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-weight:700;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.mut{color:var(--mut);font-size:13px}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 14px;background:var(--ink);color:var(--bg);cursor:pointer}
+button.pri{background:var(--org);color:#fff}button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,.slot:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+button:disabled{opacity:.45}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;background:none;color:var(--mut);border-radius:0;padding:12px 4px;font-size:12px}
+nav button[aria-selected=true]{color:var(--org)}
+nav span{display:block;font-size:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prod{text-align:center}.prod .e{font-size:38px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%}
+.slot{display:block;width:100%;text-align:left;background:var(--bg);color:var(--ink);border:2px solid var(--line);margin-bottom:8px}
+.slot[aria-pressed=true]{border-color:var(--mint)}
+.v{border-left:5px solid var(--org);padding-left:10px;margin-bottom:10px}
+.v.used{opacity:.4;border-color:var(--mut)}
+canvas{width:100%;height:auto;background:linear-gradient(#cdeee6,#eaf7f3);border-radius:14px;touch-action:none;display:block}
+#wheel{max-width:240px;margin:8px auto;transition:transform 3.2s cubic-bezier(.12,.7,.1,1)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:9;max-width:90%;text-align:center}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){#wheel{transition:none}}
+</style></head><body>
+<main>
+<div class="top"><h1>NovaCart</h1><div><span class="chip" id="coins"></span> <span class="chip" id="streak"></span></div></div>
+
+<section id="t-why">
+<h2>What's really breaking NovaCart</h2>
+<div class="card">
+<p class="mut">Illustrative case data (fictional platform). Orders and revenue rise, so the dashboard looks healthy, but the growth is hiding a leak.</p>
+<div class="row"><b>New orders</b><span style="color:var(--mint)">+38%</span></div><div class="bar"><i style="width:80%;background:var(--mint)"></i></div>
+<div class="row"><b>Repeat purchase rate</b><span style="color:var(--org)">−21%</span></div><div class="bar"><i style="width:42%;background:var(--org)"></i></div>
+<div class="row"><b>Cancellations</b><span style="color:var(--org)">+27%</span></div><div class="bar"><i style="width:63%;background:var(--org)"></i></div>
+<div class="row"><b>Avg delivery time</b><span style="color:var(--org)">+9 min</span></div><div class="bar"><i style="width:70%;background:var(--org)"></i></div>
+</div>
+<div class="card"><h3>Root cause (hypothesis)</h3>
+<p>Demand is bunched into the same 6–9 pm window, and the app promises one fixed ETA no matter how busy the dark stores are. Overload makes orders late, late orders get cancelled, and a customer who got a late order and no apology does not come back. Discounts buy new users, not trust.</p>
+<p class="mut">To validate: split cancellations and repeats by order hour, promised vs actual ETA, and whether a late order got any recovery.</p></div>
+<div class="card"><h3>What this app does about it</h3>
+<p><b>1. Honest ETA + calm slots:</b> shows live store load and rewards coins for choosing a quieter slot, flattening the peak.<br>
+<b>2. Delay guarantee:</b> late orders auto-issue a voucher, so a failure becomes a reason to return.<br>
+<b>3. Play &amp; streaks:</b> daily games and spin earn vouchers, bringing people back between orders.<br>
+<b>4. One-tap reorder:</b> repeat purchases take seconds.</p></div>
+<div class="card"><h3>Impact to prove</h3>
+<p class="mut">Calm-slot share of orders · late-order rate · repeat rate within 14 days of a late order · voucher redemption.</p>
+<div class="row"><span>Calm-slot orders in this demo</span><b id="m-calm">0</b></div>
+<div class="row"><span>Late orders recovered with a voucher</span><b id="m-rec">0</b></div></div>
+</section>
+
+<section id="t-shop" hidden>
+<h2>Order in minutes</h2>
+<div class="card" id="load"></div>
+<div class="grid" id="prods"></div>
+<div class="card" style="margin-top:12px"><h3>Cart</h3><div id="cart" class="mut">Empty. Add a few items.</div>
+<h3 style="margin-top:10px">Pick your delivery slot</h3><div id="slots"></div>
+<div class="row"><span>Voucher</span><select id="vsel"></select></div>
+<div class="row" style="margin-top:8px"><b id="total"></b><button class="pri" id="place">Place order</button></div></div>
+<div class="card" id="orders" hidden><h3>Your order</h3><div id="ordtxt"></div><button class="alt" id="late" style="margin-top:8px">Demo: make this order late</button>
+<button class="alt" id="reorder" style="margin-top:8px" hidden>Reorder in one tap</button></div>
+</section>
+
+<section id="t-play" hidden>
+<h2>Play to earn vouchers</h2>
+<div class="card"><h3>Grocery Catch</h3><p class="mut">Drag the basket. Catch food, dodge the spiky bombs. 20 seconds. 15+ catches wins a voucher.</p>
+<canvas id="cv" width="360" height="400"></canvas>
+<div class="row" style="margin-top:8px"><b id="score">Score 0</b><button class="pri" id="start">Start game</button></div></div>
+<div class="card" style="text-align:center"><h3>Daily spin</h3>
+<canvas id="wheel" width="240" height="240"></canvas>
+<button class="pri" id="spin">Spin</button> <button class="alt" id="resetspin">Reset (demo)</button></div>
+</section>
+
+<section id="t-wal" hidden>
+<h2>Wallet</h2>
+<div class="card"><h3>Vouchers</h3><div id="vlist"></div></div>
+<div class="card"><h3>Daily check-in</h3><p class="mut">Check in each day to grow your streak. Day 3 and 7 unlock a voucher.</p><button class="pri" id="check">Check in</button></div>
+</section>
+</main>
+<nav role="tablist">
+<button role="tab" data-t="why" aria-selected="true"><span>🔍</span>Insight</button>
+<button role="tab" data-t="shop" aria-selected="false"><span>🛒</span>Shop</button>
+<button role="tab" data-t="play" aria-selected="false"><span>🎮</span>Play</button>
+<button role="tab" data-t="wal" aria-selected="false"><span>🎟️</span>Wallet</button>
+</nav>
+<script>
+const $=s=>document.querySelector(s);
+const S={coins:20,streak:0,checked:false,spun:false,cart:{},slot:1,vouchers:[{id:1,t:'Welcome ₹30 off',amt:30,used:false}],order:null,calm:0,rec:0,vid:2};
+try{const o=JSON.parse(localStorage.getItem('nc')||'null');if(o)Object.assign(S,o)}catch(e){}
+const save=()=>{try{localStorage.setItem('nc',JSON.stringify(S))}catch(e){}};
+const P=[['🥛','Milk 1L',62],['🍞','Bread',45],['🥚','Eggs 6',54],['🍌','Bananas',40],['🍅','Tomatoes',35],['🧀','Cheese',95],['🍫','Chocolate',80],['🥤','Soda',50]];
+const SLOTS=[{n:'Now',eta:38,load:92,bonus:0},{n:'In 30 min',eta:22,load:61,bonus:5},{n:'In 60 min',eta:15,load:38,bonus:10}];
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+function give(t,amt){S.vouchers.push({id:S.vid++,t,amt,used:false});save();render();toast('Voucher added: '+t)}
+function render(){
+$('#coins').textContent='🪙 '+S.coins;$('#streak').textContent='🔥 '+S.streak;
+$('#m-calm').textContent=S.calm;$('#m-rec').textContent=S.rec;
+$('#load').innerHTML='<b>Store load right now: 92% (busy)</b><div class="bar"><i style="width:92%;background:var(--org)"></i></div><span class="mut">Order now and it may take about 38 min. A later slot is faster and earns coins.</span>';
+$('#prods').innerHTML=P.map((p,i)=>`<div class="card prod"><div class="e">${p[0]}</div><b>${p[1]}</b><div class="mut">₹${p[2]}</div><button data-add="${i}">Add${S.cart[i]?' ('+S.cart[i]+')':''}</button></div>`).join('');
+const ids=Object.keys(S.cart);
+$('#cart').innerHTML=ids.length?ids.map(i=>`${P[i][0]} ${P[i][1]} × ${S.cart[i]} <button class="alt" data-rm="${i}" style="padding:2px 8px">−</button>`).join('<br>'):'Empty. Add a few items.';
+$('#slots').innerHTML=SLOTS.map((s,i)=>`<button class="slot" data-slot="${i}" aria-pressed="${S.slot==i}"><b>${s.n}</b> · arrives in about ${s.eta} min<br><span class="mut">Store load ${s.load}%${s.bonus?' · earn +'+s.bonus+' coins':''}</span></button>`).join('');
+const un=S.vouchers.filter(v=>!v.used);
+const cur=$('#vsel').value;
+$('#vsel').innerHTML='<option value="">None</option>'+un.map(v=>`<option value="${v.id}">${v.t}</option>`).join('');$('#vsel').value=cur;
+let sub=ids.reduce((a,i)=>a+P[i][2]*S.cart[i],0),v=un.find(v=>v.id==$('#vsel').value);
+$('#total').textContent='Total ₹'+Math.max(0,sub-(v?v.amt:0));
+$('#place').disabled=!ids.length;
+$('#vlist').innerHTML=S.vouchers.length?S.vouchers.slice().reverse().map(v=>`<div class="v ${v.used?'used':''}"><b>${v.t}</b><div class="mut">₹${v.amt} off${v.used?' · used':''}</div></div>`).join(''):'<span class="mut">No vouchers yet. Play a game or spin.</span>';
+$('#check').disabled=S.checked;$('#check').textContent=S.checked?'Checked in today':'Check in';
+$('#spin').disabled=S.spun;
+if(S.order){$('#orders').hidden=false;$('#ordtxt').innerHTML=S.order.txt}
+save()}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+if(b.dataset.t){document.querySelectorAll('section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.t);document.querySelectorAll('nav button').forEach(n=>n.setAttribute('aria-selected',n===b));scrollTo(0,0)}
+if(b.dataset.add!=null){S.cart[b.dataset.add]=(S.cart[b.dataset.add]||0)+1;render()}
+if(b.dataset.rm!=null){const k=b.dataset.rm;if(--S.cart[k]<=0)delete S.cart[k];render()}
+if(b.dataset.slot!=null){S.slot=+b.dataset.slot;render()}});
+$('#vsel').onchange=render;
+$('#place').onclick=()=>{const s=SLOTS[S.slot],id=$('#vsel').value;if(id)S.vouchers.find(v=>v.id==id).used=true;
+S.lastCart={...S.cart};S.coins+=5+s.bonus;if(s.bonus)S.calm++;
+S.order={late:false,txt:`Placed. Arriving in about ${s.eta} min (${s.n}). You earned ${5+s.bonus} coins.`};S.cart={};render();$('#reorder').hidden=false;toast('Order placed. +'+(5+s.bonus)+' coins')};
+$('#late').onclick=()=>{if(!S.order||S.order.late)return;S.order.late=true;S.order.txt='We missed your promised time. Sorry! A ₹50 delay voucher is in your wallet.';S.rec++;give('Delay guarantee ₹50',50)};
+$('#reorder').onclick=()=>{S.cart={...S.lastCart};render();toast('Last order added to cart')};
+$('#check').onclick=()=>{S.checked=true;S.streak++;S.coins+=5;render();if(S.streak%7==0)give('7-day streak ₹60',60);else if(S.streak%3==0)give('3-day streak ₹25',25)};
+/* wheel */
+const W=[['₹10',10],['₹20',20],['10 coins',0],['₹40',40],['5 coins',0],['₹15',15]];
+const wc=$('#wheel').getContext('2d');let rot=0;
+(function(){const n=W.length,a=2*Math.PI/n;W.forEach((w,i)=>{wc.beginPath();wc.moveTo(120,120);wc.arc(120,120,118,i*a,(i+1)*a);wc.fillStyle=['#13a58a','#ff7a1a','#14213d','#f2b705','#2d7dd2','#e0457b'][i];wc.fill();
+wc.save();wc.translate(120,120);wc.rotate(i*a+a/2);wc.fillStyle='#fff';wc.font='700 15px sans-serif';wc.textAlign='right';wc.fillText(w[0],108,5);wc.restore()})})();
+$('#spin').onclick=()=>{if(S.spun)return;S.spun=true;const i=Math.floor(Math.random()*W.length),a=360/W.length;
+rot+=1440+(360-(i*a+a/2))-(rot%360)-90+360;$('#wheel').style.transform=`rotate(${rot}deg)`;
+setTimeout(()=>{const w=W[i];if(w[1])give('Spin win '+w[0],w[1]);else{S.coins+=parseInt(w[0]);render();toast('You won '+w[0])}},3300);$('#spin').disabled=true};
+$('#resetspin').onclick=()=>{S.spun=false;render()};
+/* game */
+const cv=$('#cv'),g=cv.getContext('2d');let run=false,bx=160,items=[],sc=0,tl=0,last=0;
+const pos=e=>{const r=cv.getBoundingClientRect();bx=(e.clientX-r.left)*cv.width/r.width};
+cv.addEventListener('pointermove',pos);cv.addEventListener('pointerdown',pos);
+function draw(){g.clearRect(0,0,360,400);g.font='30px serif';g.textAlign='center';items.forEach(i=>g.fillText(i.e,i.x,i.y));g.fillText('🧺',bx,385);g.font='700 14px sans-serif';g.fillStyle='#14213d';g.textAlign='left';g.fillText('⏱ '+Math.ceil(tl),8,18)}
+function loop(t){if(!run)return;const d=Math.min(.05,(t-last)/1000);last=t;tl-=d;
+if(Math.random()<d*3.2)items.push({x:20+Math.random()*320,y:-10,v:110+Math.random()*90,bad:Math.random()<.25,e:''});
+items.forEach(i=>{i.e=i.e||(i.bad?'💣':['🍎','🥕','🍞','🥛'][Math.floor(Math.random()*4)]);i.y+=i.v*d});
+items=items.filter(i=>{if(i.y>365&&i.y<400&&Math.abs(i.x-bx)<34){sc+=i.bad?-3:1;$('#score').textContent='Score '+Math.max(0,sc);return false}return i.y<410});
+draw();if(tl<=0)return end();requestAnimationFrame(loop)}
+function end(){run=false;$('#start').disabled=false;sc=Math.max(0,sc);S.coins+=sc;
+if(sc>=15)give('Game win ₹'+(sc>=22?40:20),sc>=22?40:20);else{render();toast('Score '+sc+'. Need 15 for a voucher. Try again!')}}
+$('#start').onclick=()=>{items=[];sc=0;tl=20;run=true;$('#start').disabled=true;$('#score').textContent='Score 0';last=performance.now();requestAnimationFrame(loop)};
+draw();render();
+</script></body></html>
